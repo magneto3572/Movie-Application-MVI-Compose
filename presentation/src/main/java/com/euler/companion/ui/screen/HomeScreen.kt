@@ -1,28 +1,37 @@
 package com.euler.companion.ui.screen
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.euler.companion.intent.UsersIntent
 import com.euler.companion.viewmodel.HomeViewModel
+import com.euler.data.impl.PageHandler
 import com.euler.data.uistate.UserUiState
+import com.euler.domain.model.Result
+import java.lang.Float.min
 
-
+val url = "https://image.tmdb.org/t/p/w342"
 @Composable
 fun HomeRoute(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-
-
-//    HomeScreen(
-//        viewModel =  viewModel,
-//        uiState = uiState,
-//        onIntent = viewModel::acceptIntent,
-//    )
+    HomeScreen(
+        viewModel =  viewModel,
+        uiState = uiState,
+        onIntent = viewModel::acceptIntent,
+    )
 }
 
 @Composable
@@ -30,80 +39,29 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     uiState: UserUiState,
     onIntent: (UsersIntent) -> Unit, ) {
-
-   // HomeMovieGrid(viewModel, navController, uiState, onIntent)
+    HomeMovieGrid(viewModel, uiState, onIntent)
 }
 
 @Composable
 fun HomeMovieGrid(
     viewModel: HomeViewModel,
-    navController: NavHostController,
     uiState: UserUiState,
     onIntent: (UsersIntent) -> Unit
 ) {
-//    val scrollState = rememberLazyGridState()
-//    val scrollOffset = remember {
-//        derivedStateOf {
-//            min(1f, 1 - (scrollState.firstVisibleItemScrollOffset / 600f + scrollState.firstVisibleItemIndex))
-//        }
-//    }
-//    val list = remember{ mutableStateListOf<Result>()}
-//    val horiList = remember{ mutableStateListOf<Result>()}
-//    val showProgressBarState = remember { mutableStateOf(false) }
+    val scrollState = rememberLazyGridState()
+    val scrollOffset = remember {
+        derivedStateOf {
+            min(1f, 1 - (scrollState.firstVisibleItemScrollOffset / 600f + scrollState.firstVisibleItemIndex))
+        }
+    }
+    val list = remember{ mutableStateListOf<com.euler.domain.model.Result>()}
+    val horiList = remember{ mutableStateListOf<com.euler.domain.model.Result>()}
+    val showProgressBarState = remember { mutableStateOf(false) }
 //    if (showProgressBarState.value) { Loader() }
-//
-//    setupObersevable(showProgressBarState , viewModel, list, horiList)
-//    SetupLayout(list, viewModel, navController, scrollOffset, scrollState, horiList)
+    uiState.data?.let { list.addAll(it.results) }
+    SetupLayout(list, scrollState, onIntent)
 }
 
-//@Composable
-//fun setupObersevable(
-//    showProgressBarState: MutableState<Boolean>,
-//    viewModel: HomeScreenViewModel,
-//    list: SnapshotStateList<Result>,
-//    horiList: SnapshotStateList<Result>
-//) {
-//    LaunchedEffect(Unit) {
-//        viewModel.fetchallData(page)
-//        viewModel.movieRes.collect{
-//            when (it){
-//                is Resource.Success->{
-//                    showProgressBarState.value = false
-//                    list.addAll(it.value.Results)
-//                }
-//                is Resource.Loading ->{
-//                    showProgressBarState.value = true
-//                }
-//                is Resource.Failure ->{
-//                    showProgressBarState.value = false
-//                }
-//                else -> {
-//                    showProgressBarState.value = false
-//                }
-//            }
-//        }
-//    }
-//
-//    LaunchedEffect(Unit){
-//        viewModel.horimovieRes.collect{
-//            when (it){
-//                is Resource.Success->{
-//                    showProgressBarState.value = false
-//                    horiList.addAll(it.value.Results)
-//                }
-//                is Resource.Loading ->{
-//                    showProgressBarState.value = true
-//                }
-//                is Resource.Failure ->{
-//                    showProgressBarState.value = false
-//                }
-//                else -> {
-//                    showProgressBarState.value = false
-//                }
-//            }
-//        }
-//    }
-//}
 
 
 //@Composable
@@ -116,37 +74,33 @@ fun HomeMovieGrid(
 //    }
 //}
 //
-//@Composable
-//fun SetupLayout(
-//    list: SnapshotStateList<Result>,
-//    viewModel: HomeScreenViewModel,
-//    navController: NavHostController,
-//    scrollOffset: State<Float>,
-//    scrollState: LazyGridState,
-//    horiList: SnapshotStateList<Result>
-//) {
-//    Column(modifier = Modifier
-//        .fillMaxSize()
-//    ) {
-//
-//        HoriRow(scrollOffset, horiList)
-//        LazyVerticalGrid(
-//            columns = GridCells.Adaptive(125.dp),
-//            contentPadding = PaddingValues(8.dp),
-//            state = scrollState
-//        ) {
-//            itemsIndexed(list) { index, destination ->
-//                Row(Modifier.padding(5.dp)) {
-//                    if(index == list.lastIndex){
-//                        page++
-//                        viewModel.getData(page)
-//                    }
-//                    ItemLayout(destination, index, navController)
-//                }
-//            }
-//        }
-//    }
-//}
+@Composable
+fun SetupLayout(
+    list: List<Result>,
+    scrollState: LazyGridState,
+    onIntent: (UsersIntent) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxSize()
+    ) {
+
+      //  HoriRow(scrollOffset, horiList)
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(125.dp),
+            contentPadding = PaddingValues(8.dp),
+            state = scrollState
+        ) {
+            itemsIndexed(list) { index, destination ->
+                Row(Modifier.padding(5.dp)) {
+                    if(index == list.lastIndex){
+                        PageHandler.page++
+                        onIntent(UsersIntent.GetUserData)
+                    }
+                    ItemLayout(destination, index)
+                }
+            }
+        }
+    }
+}
 //
 //@Composable
 //fun HoriRow(scrollOffset: State<Float>, list: SnapshotStateList<Result>) {
@@ -236,35 +190,34 @@ fun HomeMovieGrid(
 //        composition = composition,
 //        progress = { progress })
 //}
-//
-//@Composable
-//fun ItemLayout(destination: Result, index: Int, navController: NavHostController) {
-//    destination.apply {
-//        Column(
-//            verticalArrangement = Arrangement.Center,
-//            modifier = Modifier
-//                .shadow(2.dp, RoundedCornerShape(8.dp))
-//                .background(MaterialTheme.colorScheme.onPrimary)
-//                .fillMaxWidth()
-//                .clickable {
-//                    navController.navigate("details/$title/$release_date$poster_path/$original_language/${vote_average.toString()}/$overview")
-//                }
-//        ) {
-//            val showProgressBarState = remember { mutableStateOf(false) }
+
+@Composable
+fun ItemLayout(destination: com.euler.domain.model.Result, index: Int) {
+    destination.apply {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .shadow(2.dp, RoundedCornerShape(8.dp))
+                .fillMaxWidth()
+                .clickable {
+                    //navController.navigate("details/$title/$release_date$poster_path/$original_language/${vote_average.toString()}/$overview")
+                }
+        ) {
+            val showProgressBarState = remember { mutableStateOf(false) }
 //            if (showProgressBarState.value) { ShowProgressBar() }
-//            AsyncImage(
-//                onLoading = {
-//                    showProgressBarState.value = true
-//                },
-//                onSuccess = {
-//                    showProgressBarState.value = false
-//                },
-//                model = url+poster_path,
-//                alignment = Alignment.Center,
-//                contentDescription = destination.title,
-//                contentScale = ContentScale.FillBounds,
-//                modifier = Modifier.defaultMinSize(125.dp, 180.dp)
-//            )
-//        }
-//    }
-//}
+            AsyncImage(
+                onLoading = {
+                    showProgressBarState.value = true
+                },
+                onSuccess = {
+                    showProgressBarState.value = false
+                },
+                model = url+poster_path,
+                alignment = Alignment.Center,
+                contentDescription = destination.title,
+                contentScale = ContentScale.FillBounds,
+                modifier = Modifier.defaultMinSize(125.dp, 180.dp)
+            )
+        }
+    }
+}

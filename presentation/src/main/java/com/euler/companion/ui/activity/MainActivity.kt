@@ -41,7 +41,6 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Toast.makeText(this, "This is main activity", Toast.LENGTH_SHORT).show()
                     LazyVerticalGridActivityScreen()
                 }
             }

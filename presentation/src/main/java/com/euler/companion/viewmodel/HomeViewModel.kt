@@ -1,17 +1,16 @@
 package com.euler.companion.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
 import com.euler.companion.base.BaseViewModel
 import com.euler.companion.event.UsersEvent
 import com.euler.companion.intent.UsersIntent
 import com.euler.data.uistate.UserUiState
-import com.euler.domain.repository.HomeRepository
 import com.euler.domain.usecase.HomeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
 
 private const val HTTP_PREFIX = "http"
@@ -33,6 +32,8 @@ class HomeViewModel @Inject constructor(
         is UsersIntent.GetUserData -> getData()
         is UsersIntent.ItemClicked -> itemClicked(intent.uri)
     }
+
+
 
     override fun reduceUiState(
         previousState: UserUiState,

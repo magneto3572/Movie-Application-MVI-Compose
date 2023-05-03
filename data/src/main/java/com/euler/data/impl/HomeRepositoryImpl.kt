@@ -13,7 +13,7 @@ class HomeRepositoryImpl @Inject constructor(
 ) : HomeRepository {
 
     override suspend fun directApiCall(): Flow<MovieResponse> = flow {
-        emit(apiService.getUserData(1))
+        emit(apiService.getUserData(PageHandler.page))
     }
 }
 
