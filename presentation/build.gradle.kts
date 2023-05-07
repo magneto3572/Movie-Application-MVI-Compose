@@ -14,10 +14,10 @@ plugins {
 
 android {
     compileSdk = 33
-    namespace = "com.euler.companion"
+    namespace = "com.bishal.companion"
 
     defaultConfig {
-        applicationId = "com.euler.companion"
+        applicationId = "com.bishal.companion"
         minSdk = 25
         targetSdk = 33
         versionCode = 1

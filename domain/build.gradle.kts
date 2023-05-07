@@ -14,7 +14,7 @@ plugins {
 
 android {
     compileSdk = 33
-    namespace = "com.euler.domain"
+    namespace = "com.bishal.domain"
 
     with (defaultConfig) {
         minSdk = 25
